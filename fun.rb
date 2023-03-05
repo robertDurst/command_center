@@ -12,30 +12,30 @@ class RubyParser
 
   def parse
     lex
-
-    @tokens
   end
 
   private
 
   def lex
-    while @cur_index < @content.size
-      @cur_char = pop_char
+    while not_at_file_end
+      pop_char
 
-      next if is_white_space?(@cur_char)
-      next lex_word(@cur_char) if is_alpha?(@cur_char)
+      next if is_white_space?
+      next lex_word if is_alpha?
 
       @tokens << { type: 'CHAR', value: @cur_char }
     end
+
+    @tokens
   end
 
-  def lex_word(start_char)
-    word = start_char
+  def lex_word
+    word = @cur_char
 
-    while @cur_index < @content.size
-      @cur_char = pop_char
+    while not_at_file_end
+      pop_char
 
-      unless is_alpha_num_underscore?(@cur_char)
+      unless is_alpha_num_underscore?
         @tokens << { type: 'WORD', value: word }
         push_char
         return
@@ -49,27 +49,32 @@ class RubyParser
 
   def pop_char
     @cur_index += 1
-    @content[@cur_index - 1]
+    @cur_char = @content[@cur_index - 1]
   end
 
   def push_char
     @cur_index -= 1
+    @cur_char = @content[@cur_index]
   end
 
-  def is_white_space?(char)
-    char.match(/\s/)
+  def is_white_space?
+    @cur_char.match(/\s/)
   end
 
-  def is_alpha?(char)
-    char.match(/[a-zA-Z]/)
+  def is_alpha?
+    @cur_char.match(/[a-zA-Z]/)
   end
 
-  def is_num?(char)
-    char.match(/[0-9]/)
+  def is_num?
+    @cur_char.match(/[0-9]/)
   end
 
-  def is_alpha_num_underscore?(char)
-    is_alpha?(char) || is_num?(char) || char.match(/_/)
+  def is_alpha_num_underscore?
+    is_alpha? || is_num? || @cur_char.match(/_/)
+  end
+
+  def not_at_file_end
+    @cur_index < @content.size
   end
 end
 
