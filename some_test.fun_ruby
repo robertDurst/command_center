@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SomeClass
   def initialize(some_var:)
     @some_var = some_var

@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# RubyParser parses Ruby
 class RubyParser
   def initialize(file_path:)
     @content = File.open(file_path).read
@@ -20,8 +23,8 @@ class RubyParser
     while not_at_file_end
       pop_char
 
-      next if is_white_space?
-      next lex_word if is_alpha?
+      next if white_space?
+      next lex_word if alpha?
 
       @tokens << { type: 'CHAR', value: @cur_char }
     end
@@ -30,21 +33,15 @@ class RubyParser
   end
 
   def lex_word
-    word = @cur_char
+    word = ''
 
-    while not_at_file_end
+    while not_at_file_end && alpha_num_underscore?
+      word += @cur_char
       pop_char
-
-      unless is_alpha_num_underscore?
-        @tokens << { type: 'WORD', value: word }
-        push_char
-        return
-      end
-
-      word << @cur_char
     end
 
     @tokens << { type: 'WORD', value: word }
+    push_char unless not_at_file_end
   end
 
   def pop_char
@@ -57,20 +54,20 @@ class RubyParser
     @cur_char = @content[@cur_index]
   end
 
-  def is_white_space?
+  def white_space?
     @cur_char.match(/\s/)
   end
 
-  def is_alpha?
+  def alpha?
     @cur_char.match(/[a-zA-Z]/)
   end
 
-  def is_num?
+  def num?
     @cur_char.match(/[0-9]/)
   end
 
-  def is_alpha_num_underscore?
-    is_alpha? || is_num? || @cur_char.match(/_/)
+  def alpha_num_underscore?
+    alpha? || num? || @cur_char.match(/_/)
   end
 
   def not_at_file_end
@@ -78,6 +75,5 @@ class RubyParser
   end
 end
 
-tokens = RubyParser.new(file_path: 'some_test.rb').parse
+tokens = RubyParser.new(file_path: 'some_test.fun_ruby').parse
 pp tokens
-
