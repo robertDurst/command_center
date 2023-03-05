@@ -1,5 +1,25 @@
 # frozen_string_literal: true
 
+# TODO: monkey patch this correctly
+# POR String
+class String
+  def alpha?
+    match(/[a-zA-S]/)
+  end
+
+  def white_space?
+    match(/\s/)
+  end
+
+  def num?
+    match(/[0-9]/)
+  end
+
+  def alpha_num_underscore?
+    alpha? || num? || match(/_/)
+  end
+end
+
 # RubyParser parses Ruby
 class RubyParser
   def initialize(file_path:)
@@ -23,8 +43,8 @@ class RubyParser
     while not_at_file_end
       pop_char
 
-      next if white_space?
-      next lex_word if alpha?
+      next if @cur_char.white_space?
+      next lex_word if @cur_char.alpha?
 
       @tokens << { type: 'CHAR', value: @cur_char }
     end
@@ -35,13 +55,13 @@ class RubyParser
   def lex_word
     word = ''
 
-    while not_at_file_end && alpha_num_underscore?
+    while not_at_file_end && @cur_char.alpha_num_underscore?
       word += @cur_char
       pop_char
     end
 
     @tokens << { type: 'WORD', value: word }
-    push_char unless not_at_file_end
+    push_char if not_at_file_end
   end
 
   def pop_char
@@ -52,22 +72,6 @@ class RubyParser
   def push_char
     @cur_index -= 1
     @cur_char = @content[@cur_index]
-  end
-
-  def white_space?
-    @cur_char.match(/\s/)
-  end
-
-  def alpha?
-    @cur_char.match(/[a-zA-Z]/)
-  end
-
-  def num?
-    @cur_char.match(/[0-9]/)
-  end
-
-  def alpha_num_underscore?
-    alpha? || num? || @cur_char.match(/_/)
   end
 
   def not_at_file_end
