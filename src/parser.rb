@@ -39,13 +39,13 @@ class RubyParser
     @content
   end
 
-  def parse
-    lex
+  def lex 
+    lex_content
   end
 
   private
 
-  def lex
+  def lex_content
     while not_at_file_end
       pop_char
 
