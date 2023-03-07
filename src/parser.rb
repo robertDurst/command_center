@@ -1,24 +1,6 @@
 # frozen_string_literal: true
 
-# TODO: monkey patch this correctly
-# POR String
-class String
-  def alpha?
-    match?(/[a-zA-Z]/)
-  end
-
-  def white_space?
-    match?(/\s/)
-  end
-
-  def num?
-    match?(/[0-9]/)
-  end
-
-  def alpha_num_underscore?
-    alpha? || num? || match?(/_/)
-  end
-end
+require './src/string.rb'
 
 # RubyParser parses Ruby
 class RubyParser
@@ -63,10 +45,40 @@ class RubyParser
       { type: 'L_PAREN', value: @cur_char }
     when '#'
       { type: 'HASH_TAG', value: @cur_char }
+    when '"'
+      { type: 'DOUBLE_QUOTE', value: @cur_char }
+    when '\''
+      { type: 'SINGLE_QUOTE', value: @cur_char }
     when '.'
       { type: 'DOT', value: @cur_char }
+    when '['
+      { type: 'L_SQUARE_PAREN', value: @cur_char }
+    when ']'
+      { type: 'R_SQUARE_PAREN', value: @cur_char }
+    when ','
+      { type: 'COMMA', value: @cur_char }
+    when '%'
+      { type: 'PERCENT', value: @cur_char }
+    when '<'
+      { type: 'LESS_THAN', value: @cur_char }
+    when '>'
+      { type: 'GREATER_THAN', value: @cur_char }
+    when ';'
+      { type: 'SEMI_COLON', value: @cur_char }
+    when '{'
+      { type: 'L_CURLY', value: @cur_char }
+    when '}'
+      { type: 'R_CURLY', value: @cur_char }
+    when '}'
+      { type: 'R_CURLY', value: @cur_char }
+    when '!'
+      { type: 'EXCLAMATION_MARK', value: @cur_char }
+    when '?'
+      { type: 'QUESTION_MARK', value: @cur_char }
     when '='
       lex_extended_symbol('=', 'EQUALS', 'EQUALS_EQUALS')
+    when '|'
+      lex_extended_symbol('|', 'PIPE', 'PIPE_PIPE')
     when '-'
       lex_extended_symbol('=', 'MINUS', 'MINUS_EQUALS')
     when '+'

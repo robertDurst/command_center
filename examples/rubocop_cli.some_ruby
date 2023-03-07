@@ -1,0 +1,74 @@
+# frozen_string_literal: true
+
+require 'fileutils'
+
+module RuboCop
+  # The CLI is a class responsible of handling all the command line interface
+  # logic.
+  class CLI
+    STATUS_SUCCESS     = 0
+    STATUS_OFFENSES    = 1
+    STATUS_ERROR       = 2
+    STATUS_INTERRUPTED = Signal.list['INT'] + 128
+    DEFAULT_PARALLEL_OPTIONS = %i[
+      color debug display_style_guide display_time display_only_fail_level_offenses
+    ].freeze
+
+    class Finished < StandardError; end
+
+    attr_reader :options, :config_store
+
+    def initialize
+      @options = {}
+      @config_store = ConfigStore.new
+    end
+
+    # @api public
+    #
+    # Entry point for the application logic. Here we
+    # do the command line arguments processing and inspect
+    # the target files.
+    #
+    # @param args [Array<String>] command line arguments
+    # @return [Integer] UNIX exit code
+    #
+    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+    def run(args = ARGV)
+      @options, paths = Options.new.parse(args)
+      @env = Environment.new(@options, @config_store, paths)
+
+      profile_if_needed do
+        if @options[:init]
+          run_command(:init)
+        else
+          act_on_options
+          validate_options_vs_config
+          parallel_by_default!
+          apply_default_formatter
+          execute_runners
+        end
+      end
+    rescue RuboCop::Error => e
+      warn Rainbow("Error: #{e.message}").red
+      STATUS_ERROR
+    rescue Finished
+      STATUS_SUCCESS
+    rescue StandardError, SyntaxError, LoadError => e
+      warn e.message
+      warn e.backtrace
+      STATUS_ERROR
+    end
+    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
+
+    private
+
+    def handle_exiting_options
+      return unless Options::EXITING_OPTIONS.any? { |o| @options.key? o }
+
+      run_command(:version) if @options[:version] || @options[:verbose_version]
+      run_command(:show_cops) if @options[:show_cops]
+      run_command(:show_docs_url) if @options[:show_docs_url]
+      raise Finished
+    end
+  end
+end
