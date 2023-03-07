@@ -4,6 +4,30 @@ require './src/string'
 
 # RubyParser parses Ruby
 class RubyParser
+  SIMPLE_SYMBOLS = {
+    ':' => 'COLON',
+    ')' => 'R_PAREN',
+    '(' => 'L_PAREN',
+    '#' => 'HASH_TAG',
+    '\'' => 'SINGLE_QUOTE',
+    '"' => 'DOUBLE_QUOTE',
+    '.' => 'DOT',
+    '[' => 'L_SQUARE_PAREN',
+    ']' => 'R_SQUARE_PAREN',
+    '{' => 'L_CURLY',
+    '}' => 'R_CURLY',
+    ',' => 'COMMA',
+    '%' => 'PERCENT',
+    '<' => 'LESS_THAN',
+    '>' => 'GREATER_THAN',
+    ';' => 'SEMI_COLON',
+    '!' => 'EXCLAMATION_MARK',
+    '?' => 'QUESTION_MARK',
+    '\\' => 'BACKWARD_SLASH',
+    '`' => 'BACK_TICK',
+    '_' => 'UNDERSCORE',
+    '^' => 'CARET'
+  }.freeze
   def initialize(content:)
     @content = content
     @cur_char = ''
@@ -36,51 +60,9 @@ class RubyParser
   end
 
   def lex_symbol
+    return { type: SIMPLE_SYMBOLS[@cur_char], value: @cur_char } if SIMPLE_SYMBOLS.key?(@cur_char)
+
     case @cur_char
-    when ':'
-      { type: 'COLON', value: @cur_char }
-    when ')'
-      { type: 'R_PAREN', value: @cur_char }
-    when '('
-      { type: 'L_PAREN', value: @cur_char }
-    when '#'
-      { type: 'HASH_TAG', value: @cur_char }
-    when '"'
-      { type: 'DOUBLE_QUOTE', value: @cur_char }
-    when '\''
-      { type: 'SINGLE_QUOTE', value: @cur_char }
-    when '.'
-      { type: 'DOT', value: @cur_char }
-    when '['
-      { type: 'L_SQUARE_PAREN', value: @cur_char }
-    when ']'
-      { type: 'R_SQUARE_PAREN', value: @cur_char }
-    when ','
-      { type: 'COMMA', value: @cur_char }
-    when '%'
-      { type: 'PERCENT', value: @cur_char }
-    when '<'
-      { type: 'LESS_THAN', value: @cur_char }
-    when '>'
-      { type: 'GREATER_THAN', value: @cur_char }
-    when ';'
-      { type: 'SEMI_COLON', value: @cur_char }
-    when '{'
-      { type: 'L_CURLY', value: @cur_char }
-    when '}'
-      { type: 'R_CURLY', value: @cur_char }
-    when '!'
-      { type: 'EXCLAMATION_MARK', value: @cur_char }
-    when '?'
-      { type: 'QUESTION_MARK', value: @cur_char }
-    when '^'
-      { type: 'CARET', value: @cur_char }
-    when '\\'
-      { type: 'BACKWARD_SLASH', value: @cur_char }
-    when '`'
-      { type: 'BACK_TICK', value: @cur_char }
-    when '_'
-      { type: 'UNDERSCORE', value: @cur_char }
     when '&'
       lex_extended_symbol('&', 'AND_SIGN', 'AND_SIGN_AND_SIGN')
     when '='
