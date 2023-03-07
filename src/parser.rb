@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './src/string.rb'
+require './src/string'
 
 # RubyParser parses Ruby
 class RubyParser
@@ -69,12 +69,20 @@ class RubyParser
       { type: 'L_CURLY', value: @cur_char }
     when '}'
       { type: 'R_CURLY', value: @cur_char }
-    when '}'
-      { type: 'R_CURLY', value: @cur_char }
     when '!'
       { type: 'EXCLAMATION_MARK', value: @cur_char }
     when '?'
       { type: 'QUESTION_MARK', value: @cur_char }
+    when '^'
+      { type: 'CARET', value: @cur_char }
+    when '\\'
+      { type: 'BACKWARD_SLASH', value: @cur_char }
+    when '`'
+      { type: 'BACK_TICK', value: @cur_char }
+    when '_'
+      { type: 'UNDERSCORE', value: @cur_char }
+    when '&'
+      lex_extended_symbol('&', 'AND_SIGN', 'AND_SIGN_AND_SIGN')
     when '='
       lex_extended_symbol('=', 'EQUALS', 'EQUALS_EQUALS')
     when '|'
@@ -95,12 +103,12 @@ class RubyParser
   end
 
   def lex_extended_symbol(extension, type, type_extended)
-      if @content[@cur_index] == extension
-        @cur_index += 1
-        { type: type_extended, value: "#{@cur_char}#{extension}" }
-      else
-        { type: type, value: @cur_char }
-      end
+    if @content[@cur_index] == extension
+      @cur_index += 1
+      { type: type_extended, value: "#{@cur_char}#{extension}" }
+    else
+      { type: type, value: @cur_char }
+    end
   end
 
   def lex_num
@@ -112,7 +120,6 @@ class RubyParser
       decimal = true if @cur_char.match?(/\./)
       pop_char
     end
-
 
     @tokens << { type: 'NUMBER', value: num }
     push_char if not_at_file_end
@@ -144,4 +151,3 @@ class RubyParser
     @cur_index < @content.size
   end
 end
-

@@ -19,4 +19,3 @@ class String
     alpha? || num? || match?(/_/)
   end
 end
-
